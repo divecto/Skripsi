@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 from .SearchAttention import SA
-from Src.backbone.ResNet import ResNet_2Branch
+from Src.backbone.ResNet import ResNet_2Branch  # Pastikan import yang benar
 
 
 class BasicConv2d(nn.Module):
@@ -17,7 +17,7 @@ class BasicConv2d(nn.Module):
     def forward(self, x):
         x = self.conv(x)
         x = self.bn(x)
-        return x
+        return self.relu(x)
 
 
 class RF(nn.Module):
@@ -49,7 +49,7 @@ class RF(nn.Module):
             BasicConv2d(out_channel, out_channel, 3, padding=7, dilation=7)
         )
 
-        self.conv_cat = BasicConv2d(4*out_channel, out_channel, 3, padding=1)
+        self.conv_cat = BasicConv2d(4 * out_channel, out_channel, 3, padding=1)
         self.conv_res = BasicConv2d(in_channel, out_channel, 1)
 
     def forward(self, x):
@@ -75,15 +75,14 @@ class PDC_SM(nn.Module):
         self.conv_upsample2 = BasicConv2d(channel, channel, 3, padding=1)
         self.conv_upsample3 = BasicConv2d(channel, channel, 3, padding=1)
         self.conv_upsample4 = BasicConv2d(channel, channel, 3, padding=1)
-        self.conv_upsample5 = BasicConv2d(2*channel, 2*channel, 3, padding=1)
+        self.conv_upsample5 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
 
-        self.conv_concat2 = BasicConv2d(2*channel, 2*channel, 3, padding=1)
-        self.conv_concat3 = BasicConv2d(4*channel, 4*channel, 3, padding=1)
-        self.conv4 = BasicConv2d(4*channel, 4*channel, 3, padding=1)
-        self.conv5 = nn.Conv2d(4*channel, 1, 1)
+        self.conv_concat2 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
+        self.conv_concat3 = BasicConv2d(4 * channel, 4 * channel, 3, padding=1)
+        self.conv4 = BasicConv2d(4 * channel, 4 * channel, 3, padding=1)
+        self.conv5 = nn.Conv2d(4 * channel, 1, 1)
 
     def forward(self, x1, x2, x3, x4):
-        # print x1.shape, x2.shape, x3.shape, x4.shape
         x1_1 = x1
         x2_1 = self.conv_upsample1(self.upsample(x1)) * x2
         x3_1 = self.conv_upsample2(self.upsample(self.upsample(x1))) * self.conv_upsample3(self.upsample(x2)) * x3
@@ -111,12 +110,12 @@ class PDC_IM(nn.Module):
         self.conv_upsample2 = BasicConv2d(channel, channel, 3, padding=1)
         self.conv_upsample3 = BasicConv2d(channel, channel, 3, padding=1)
         self.conv_upsample4 = BasicConv2d(channel, channel, 3, padding=1)
-        self.conv_upsample5 = BasicConv2d(2*channel, 2*channel, 3, padding=1)
+        self.conv_upsample5 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
 
-        self.conv_concat2 = BasicConv2d(2*channel, 2*channel, 3, padding=1)
-        self.conv_concat3 = BasicConv2d(3*channel, 3*channel, 3, padding=1)
-        self.conv4 = BasicConv2d(3*channel, 3*channel, 3, padding=1)
-        self.conv5 = nn.Conv2d(3*channel, 1, 1)
+        self.conv_concat2 = BasicConv2d(2 * channel, 2 * channel, 3, padding=1)
+        self.conv_concat3 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
+        self.conv4 = BasicConv2d(3 * channel, 3 * channel, 3, padding=1)
+        self.conv5 = nn.Conv2d(3 * channel, 1, 1)
 
     def forward(self, x1, x2, x3):
         x1_1 = x1
@@ -134,10 +133,10 @@ class PDC_IM(nn.Module):
         return x
 
 
-class SINet_ResNet50(nn.Module):
+class SINet_ResNet101(nn.Module):  # Rename the class to reflect ResNet-101
     # resnet based encoder decoder
     def __init__(self, channel=32, opt=None):
-        super(SINet_ResNet50, self).__init__()
+        super(SINet_ResNet101, self).__init__()  # Update the class name here
 
         self.resnet = ResNet_2Branch()
         self.downSample = nn.MaxPool2d(2, stride=2)
@@ -208,8 +207,8 @@ class SINet_ResNet50(nn.Module):
         return self.upsample_8(camouflage_map_sm), self.upsample_8(camouflage_map_im)
 
     def initialize_weights(self):
-        resnet50 = models.resnet50(pretrained=True)
-        pretrained_dict = resnet50.state_dict()
+        resnet101 = models.resnet101(pretrained=True)  # Load ResNet-101
+        pretrained_dict = resnet101.state_dict()
         all_params = {}
 
         for k, v in self.resnet.state_dict().items():
@@ -227,4 +226,5 @@ class SINet_ResNet50(nn.Module):
         assert len(all_params.keys()) == len(self.resnet.state_dict().keys())
 
         self.resnet.load_state_dict(all_params)
-        print('[INFO] initialize weights from resnet50')
+        print('[INFO] initialize weights from resnet101')
+
