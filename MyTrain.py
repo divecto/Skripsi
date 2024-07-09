@@ -10,31 +10,20 @@ from apex import amp
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--epoch', type=int, default=40,
-                        help='epoch number, default=30')
-    parser.add_argument('--lr', type=float, default=1e-4,
-                        help='init learning rate, try `lr=1e-4`')
-    parser.add_argument('--batchsize', type=int, default=36,
-                        help='training batch size (Note: ~500MB per img in GPU)')
-    parser.add_argument('--trainsize', type=int, default=352,
-                        help='the size of training image, try small resolutions for speed (like 256)')
-    parser.add_argument('--clip', type=float, default=0.5,
-                        help='gradient clipping margin')
-    parser.add_argument('--decay_rate', type=float, default=0.1,
-                        help='decay rate of learning rate per decay step')
-    parser.add_argument('--decay_epoch', type=int, default=30,
-                        help='every N epochs decay lr')
-    parser.add_argument('--gpu', type=int, default=0,
-                        help='choose which gpu you use')
-    parser.add_argument('--save_epoch', type=int, default=10,
-                        help='every N epochs save your trained snapshot')
+    parser.add_argument('--epoch', type=int, default=40, help='epoch number, default=30')
+    parser.add_argument('--lr', type=float, default=1e-4, help='init learning rate, try `lr=1e-4`')
+    parser.add_argument('--batchsize', type=int, default=18, help='training batch size (Note: ~500MB per img in GPU)')
+    parser.add_argument('--trainsize', type=int, default=352, help='the size of training image, try small resolutions for speed (like 256)')
+    parser.add_argument('--clip', type=float, default=0.5, help='gradient clipping margin')
+    parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of learning rate per decay step')
+    parser.add_argument('--decay_epoch', type=int, default=30, help='every N epochs decay lr')
+    parser.add_argument('--gpu', type=int, default=0, help='choose which gpu you use')
+    parser.add_argument('--save_epoch', type=int, default=10, help='every N epochs save your trained snapshot')
     parser.add_argument('--save_model', type=str, default='./Snapshot/2020-CVPR-SINet/')
     parser.add_argument('--train_img_dir', type=str, default='./Dataset/TrainDataset/Imgs/')
     parser.add_argument('--train_gt_dir', type=str, default='./Dataset/TrainDataset/GT/')
-    parser.add_argument('--csv_path', type=str, default='./training_log.csv', 
-                        help='path to save training log CSV')
-    parser.add_argument('--summary_path', type=str, default='./summary.txt', 
-                        help='path to save training summary TXT')
+    parser.add_argument('--csv_path', type=str, default='./training_log.csv', help='path to save training log CSV')
+    parser.add_argument('--summary_path', type=str, default='./summary.txt', help='path to save training summary TXT')
     opt = parser.parse_args()
 
     # Check available GPUs and validate the selected GPU
@@ -44,8 +33,8 @@ if __name__ == "__main__":
 
     torch.cuda.set_device(opt.gpu)
 
-    # TIPS: you also can use deeper network for better performance like channel=64
-    model_SINet = SINet_ResNet101(channel=32).cuda()  # Ganti SINet_ResNet50 dengan SINet_ResNet101
+    # Use deeper network for better performance with channel=64
+    model_SINet = SINet_ResNet101(channel=32).cuda()
     print('-' * 30, model_SINet, '-' * 30)
 
     optimizer = torch.optim.Adam(model_SINet.parameters(), opt.lr)
@@ -99,6 +88,7 @@ if __name__ == "__main__":
 
             # Write data to CSV
             writer.writerow([epoch_iter, loss])
+
             # Update plot
             update_plot(epoch_iter, loss)
 
