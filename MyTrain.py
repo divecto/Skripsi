@@ -3,7 +3,7 @@ import argparse
 import csv
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from Src.SINet import SINet_ResNet101  # Pastikan Anda mengimpor model yang benar
+from Src.SINet import SINet_ResNet101  # import ResNet-101
 from Src.utils.Dataloader import get_loader
 from Src.utils.trainer import trainer, adjust_lr
 from apex import amp
