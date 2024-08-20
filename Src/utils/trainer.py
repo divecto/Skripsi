@@ -44,39 +44,30 @@ def adjust_lr(optimizer, epoch, decay_rate=0.1, decay_epoch=30):
         param_group['lr'] *= decay
 
 
-def trainer(train_loader, model, optimizer, epoch, opt, loss_func, total_step):
-    """
-    Training iteration
-    :param train_loader:
-    :param model:
-    :param optimizer:
-    :param epoch:
-    :param opt:
-    :param loss_func:
-    :param total_step:
-    :return:
-    """
+def trainer(train_loader, model, optimizer, epoch, loss_func, total_step, opt):
     model.train()
-    for step, data_pack in enumerate(train_loader):
+    running_loss = 0.0
+    for i, (inputs, labels) in enumerate(train_loader):
+        inputs, labels = inputs.cuda(), labels.cuda()
+
         optimizer.zero_grad()
-        images, gts = data_pack
-        images = Variable(images).cuda()
-        gts = Variable(gts).cuda()
-
-        cam_sm, cam_im = model(images)
-        loss_sm = loss_func(cam_sm, gts)
-        loss_im = loss_func(cam_im, gts)
-        loss_total = loss_sm + loss_im
-
-        with amp.scale_loss(loss_total, optimizer) as scale_loss:
-            scale_loss.backward()
-
-        # clip_gradient(optimizer, opt.clip)
+        outputs = model(inputs)
+        loss = loss_func(outputs, labels)
+        
+        # Cek jika loss None
+        if loss is None:
+            print(f"Error: loss is None at batch {i} of epoch {epoch}")
+            continue
+        
+        loss.backward()
         optimizer.step()
 
-        if step % 10 == 0 or step == total_step:
-            print('[{}] => [Epoch Num: {:03d}/{:03d}] => [Global Step: {:04d}/{:04d}] => [Loss_s: {:.4f} Loss_i: {:0.4f}]'.
-                  format(datetime.now(), epoch, opt.epoch, step, total_step, loss_sm.data, loss_im.data))
+        running_loss += loss.item()
+
+    average_loss = running_loss / total_step
+    print(f'Epoch [{epoch}/{opt.epoch}], Loss: {average_loss:.4f}')
+    return average_loss
+
 
     save_path = opt.save_model
     os.makedirs(save_path, exist_ok=True)
