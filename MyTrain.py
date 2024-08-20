@@ -60,7 +60,7 @@ class EarlyStopping:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--epoch', type=int, default=40, help='epoch number, default=30')
+    parser.add_argument('--epoch', type=int, default=70, help='epoch number, default=30')
     parser.add_argument('--lr', type=float, default=1e-4, help='init learning rate, try `lr=1e-4`')
     parser.add_argument('--batchsize', type=int, default=18, help='training batch size (Note: ~500MB per img in GPU)')
     parser.add_argument('--trainsize', type=int, default=352, help='the size of training image, try small resolutions for speed (like 256)')
